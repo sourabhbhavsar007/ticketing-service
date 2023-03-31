@@ -1,0 +1,6 @@
+com\deliveryapp\ticketingservice\controller\DeliveryAppControllerTest.class
+com\deliveryapp\ticketingservice\repository\delivery\DeliveryRepositoryTest.class
+com\deliveryapp\ticketingservice\service\ticket\TicketServiceTest.class
+com\deliveryapp\ticketingservice\repository\ticket\TicketRepositoryTest.class
+com\deliveryapp\ticketingservice\service\delivery\DeliveryServiceTest.class
+com\deliveryapp\ticketingservice\TicketingServiceApplicationTests.class
