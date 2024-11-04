@@ -1,0 +1,28 @@
+To make this service prod-ready following changes are added :
+
+Service Discovery: Eureka Client
+
+DDoS Protection: Rate Limiting with Resilience4j
+
+Circuit Breaker: Resilience4j Circuit Breaker
+
+Caching: Caffeine Cache
+
+Profiling: Separate Profiles for environments
+
+HTTPS: SSL Configuration
+
+Connection Pooling: HikariCP
+
+Database Migration: Flyway
+
+Logging and MDC: Logback and MDC
+
+Monitoring: Actuator Endpoints
+
+
+Please refer application-prod.properties for properties related to above areas.
+
+I have also added @Cacheable to increse efficience by minimizing DB calls.
+
+I have enhanced test cases and test coverge. The test coverage can be seen by navigating to target/site/index.html as I have added Jacoco plugin.
