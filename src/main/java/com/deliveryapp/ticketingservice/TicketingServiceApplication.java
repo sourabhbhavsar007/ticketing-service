@@ -10,10 +10,13 @@ import lombok.AllArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 
 import java.time.LocalDateTime;
 
-@SpringBootApplication
+//@EnableEurekaClient
+@EnableCaching
+@SpringBootApplication(exclude = {org.springframework.cloud.loadbalancer.config.LoadBalancerAutoConfiguration.class})
 @AllArgsConstructor
 public class TicketingServiceApplication implements CommandLineRunner {
 

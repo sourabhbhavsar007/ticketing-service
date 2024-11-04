@@ -4,15 +4,15 @@ import com.deliveryapp.ticketingservice.constants.CustomerType;
 import com.deliveryapp.ticketingservice.constants.TicketStatus;
 import com.deliveryapp.ticketingservice.model.delivery.Delivery;
 import com.deliveryapp.ticketingservice.model.ticket.Ticket;
-import com.deliveryapp.ticketingservice.repository.delivery.DeliveryRepository;
-import com.deliveryapp.ticketingservice.repository.ticket.TicketRepository;
 import com.deliveryapp.ticketingservice.rule.EstimatedTimeGreaterThanExpectedTimeTicketingRule;
 import com.deliveryapp.ticketingservice.rule.ExpectedDeliveryTimeExceededTicketingRule;
 import com.deliveryapp.ticketingservice.rule.TicketingRule;
-import io.jsonwebtoken.lang.Collections;
+import com.deliveryapp.ticketingservice.service.delivery.DeliveryService;
+import com.deliveryapp.ticketingservice.service.ticket.TicketService;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -22,6 +22,7 @@ import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 @Component
 @EnableScheduling
@@ -29,16 +30,16 @@ public class TicketScheduler {
 
     private static final Logger logger = LoggerFactory.getLogger(TicketScheduler.class);
 
-    private DeliveryRepository deliveryRepository;
+    private final DeliveryService deliveryService;
 
-    private TicketRepository ticketRepository;
+    private final TicketService ticketService;
 
     private final Set<TicketingRule> ticketingRules;
 
     @Autowired
-    public TicketScheduler(DeliveryRepository deliveryRepository, TicketRepository ticketRepository, Set<TicketingRule> ticketingRules) {
-        this.deliveryRepository = deliveryRepository;
-        this.ticketRepository = ticketRepository;
+    public TicketScheduler(DeliveryService deliveryService, TicketService ticketService, Set<TicketingRule> ticketingRules) {
+       this.deliveryService = deliveryService;
+        this.ticketService = ticketService;
         this.ticketingRules = ticketingRules;
     }
 
@@ -53,13 +54,20 @@ public class TicketScheduler {
     public void monitorDeliveries() {
 
         logger.info("Monitoring the deliveries...");
-        List<Delivery> ordersToBeDelivered = deliveryRepository.findOrdersToBeDelivered();
 
-        if(!Collections.isEmpty(ordersToBeDelivered)) {
+        //As compared to directly calling persistence layer earlier, using a service layer in between which is having @Cacheable for efficiency.
+        List<Delivery> ordersToBeDelivered = deliveryService.getOrdersToBeDelivered();
+
+        if(!ordersToBeDelivered.isEmpty()) { //check if there are any orders for monitoring
 
             for (Delivery delivery : ordersToBeDelivered) {
 
                 logger.info(delivery.toString());
+
+                //Introducing MDC for structured logging and tracking
+                MDC.put("correlationId", UUID.randomUUID().toString());
+                logger.info("Applying rules with correlation ID : {}", MDC.get("correlationId"));
+
                 Optional<TicketingRule> ticketingRule = ticketingRules.stream()
                         .filter(rule -> rule.isTicketRequired(delivery))
                         .findFirst();
@@ -73,13 +81,14 @@ public class TicketScheduler {
 
     private boolean isExistingTicketPresent(Long deliveryId) {
 
-        Optional<Ticket> ticket = ticketRepository.findByDeliveryId(deliveryId);
+        //As compared to directly calling persistence layer earlier, using a service layer in between which is having @Cacheable for efficiency.
+        Optional<Ticket> ticket = ticketService.getTicketByDeliveryId(deliveryId);
 
         if(ticket.isPresent()){
-            logger.info("Ticket already created for the delivery Id : " + deliveryId);
+            logger.info("Ticket already created for the delivery Id : {}", deliveryId);
             return true;
         } else {
-            logger.info("Ticket needs to be created for the delivery Id : " + deliveryId);
+            logger.info("Ticket needs to be created for the delivery Id : {}", deliveryId);
             return false;
         }
 
@@ -99,12 +108,12 @@ public class TicketScheduler {
                 .status(TicketStatus.CREATED)
                 .build();
 
-        ticketRepository.save(ticket);
+        ticketService.persistTicket(ticket);
 
         //We also update the delivery attribute isTicketCreated
         //So that we don't fetch it again, and reduce the I/O and size of fetched records and collection object.
         delivery.setIsTicketCreated("TRUE");
-        deliveryRepository.save(delivery);
+        deliveryService.persistDelivery(delivery);
 
         logger.info("Ticket created : {}", ticket);
     }

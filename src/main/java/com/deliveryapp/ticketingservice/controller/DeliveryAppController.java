@@ -10,9 +10,11 @@ import com.deliveryapp.ticketingservice.service.ticket.TicketService;
 import com.deliveryapp.ticketingservice.service.user.UserAuthDetailsService;
 import com.deliveryapp.ticketingservice.service.user.UserService;
 import com.deliveryapp.ticketingservice.util.jwt.JwtUtils;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -48,21 +51,31 @@ public class DeliveryAppController {
         return getAuthResponse(authRequest);
     }
 
+    @RateLimiter(name = "ticketRateLimiter", fallbackMethod = "rateLimitFallbackResponse")
     @GetMapping("/tickets")
     public ResponseEntity<List<Ticket>> getTickets(){
-        logger.info("Request to fetch the tickets...");
+
+        //Introducing MDC for structured logging and tracking
+        MDC.put("correlationId", UUID.randomUUID().toString());
+        logger.info("Request to fetch tickets with correlation ID : {}", MDC.get("correlationId"));
+
         return new ResponseEntity<>(ticketService.getAllTickets(), HttpStatus.OK);
     }
 
+    @RateLimiter(name = "deliveryRateLimiter", fallbackMethod = "rateLimitFallbackResponse")
     @GetMapping("/deliveries")
     public ResponseEntity<List<Delivery>> getDeliveries(){
-        logger.info("Request to fetch the deliveries...");
+
+        MDC.put("correlationId", UUID.randomUUID().toString());
+        logger.info("Request to fetch deliveries with correlation ID : {}", MDC.get("correlationId"));
         return new ResponseEntity<>(deliveryService.getAllDeliveries(), HttpStatus.OK);
     }
 
     @GetMapping("/users")
     public ResponseEntity<List<User>> getUsers(){
-        logger.info("Request to fetch the deliveries...");
+
+        MDC.put("correlationId", UUID.randomUUID().toString());
+        logger.info("Request to fetch users with correlation ID : {}", MDC.get("correlationId"));
         return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
     }
 
@@ -85,6 +98,11 @@ public class DeliveryAppController {
 
         logger.info("User authenticated successfully, sending jwt token...");
         return ok(new AuthResponse(jwt));
+    }
+
+
+    public ResponseEntity<String> rateLimitFallbackResponse(Exception e) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body("Oops! There are too many requests at this time, please try again later.");
     }
 
 }

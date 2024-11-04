@@ -4,12 +4,9 @@ import com.deliveryapp.ticketingservice.TicketingServiceApplication;
 import com.deliveryapp.ticketingservice.constants.CustomerType;
 import com.deliveryapp.ticketingservice.constants.DeliveryStatus;
 import com.deliveryapp.ticketingservice.model.delivery.Delivery;
-import com.deliveryapp.ticketingservice.repository.delivery.DeliveryRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,6 +14,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TicketingServiceApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -83,6 +84,12 @@ class DeliveryRepositoryTest {
         List<Delivery> resultList = deliveryRepository.findAll();
 
         assertThat(resultList.size()).isGreaterThan(0);
+    }
+
+    @Test
+    public void testFindById_NonExistentId() {
+        Optional<Delivery> result = deliveryRepository.findById(999L);
+        assertFalse(result.isPresent());
     }
 
 }

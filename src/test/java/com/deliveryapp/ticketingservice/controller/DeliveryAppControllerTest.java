@@ -6,6 +6,7 @@ import com.deliveryapp.ticketingservice.constants.TicketStatus;
 import com.deliveryapp.ticketingservice.model.delivery.Delivery;
 import com.deliveryapp.ticketingservice.model.ticket.Ticket;
 import com.deliveryapp.ticketingservice.model.user.User;
+import com.deliveryapp.ticketingservice.repository.delivery.DeliveryRepository;
 import com.deliveryapp.ticketingservice.service.delivery.DeliveryService;
 import com.deliveryapp.ticketingservice.service.ticket.TicketService;
 import com.deliveryapp.ticketingservice.service.user.UserService;
@@ -22,16 +23,15 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.hamcrest.CoreMatchers.is;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -55,7 +55,8 @@ class DeliveryAppControllerTest {
     private List<Ticket> ticketList;
 
     private List<User> userList;
-
+    @Autowired
+    private DeliveryRepository deliveryRepository;
 
     @BeforeEach
     void setUp() {
@@ -213,6 +214,5 @@ class DeliveryAppControllerTest {
                 .andExpect(jsonPath("$[2].priority", is(2)))
                 .andExpect(jsonPath("$[2].deliveryId", is(5)));
     }
-
 
 }
