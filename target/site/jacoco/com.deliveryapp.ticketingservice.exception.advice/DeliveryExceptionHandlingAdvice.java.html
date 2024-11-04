@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DeliveryExceptionHandlingAdvice.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ticketing-service</a> &gt; <a href="index.source.html" class="el_package">com.deliveryapp.ticketingservice.exception.advice</a> &gt; <span class="el_source">DeliveryExceptionHandlingAdvice.java</span></div><h1>DeliveryExceptionHandlingAdvice.java</h1><pre class="source lang-java linenums">package com.deliveryapp.ticketingservice.exception.advice;
+
+import java.util.Date;
+
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.SignatureException;
+import org.hibernate.exception.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+/**
+ * This class is responsible for handling all un-handled runtime exceptions and log them.
+ *
+ */
+@RestControllerAdvice
+<span class="fc" id="L23">public class DeliveryExceptionHandlingAdvice {</span>
+
+<span class="fc" id="L25">    private static final Logger logger = LoggerFactory.getLogger(DeliveryExceptionHandlingAdvice.class);</span>
+
+
+    /**
+     * Handles constraint violation exception.
+     *
+     * @param exception the exception
+     * @param request   the request
+     * @return the response entity
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity&lt;DeliveryErrorDetails&gt; handleConstraintViolationException(ConstraintViolationException exception, WebRequest request) {
+
+<span class="nc" id="L38">        logger.error(exception.getMessage(), exception);</span>
+
+<span class="nc" id="L40">        DeliveryErrorDetails errorDetails = new DeliveryErrorDetails(new Date(), exception.getMessage(), request.getDescription(false));</span>
+<span class="nc" id="L41">        return new ResponseEntity&lt;&gt;(errorDetails, HttpStatus.BAD_REQUEST);</span>
+
+    }
+
+    /**
+     * Handles method argument not valid exception.
+     *
+     * @param exception the exception
+     * @param request   the request
+     * @return the response entity
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity&lt;DeliveryErrorDetails&gt; handleMethodArgumentNotValidException(MethodArgumentNotValidException exception, WebRequest request) {
+
+<span class="nc" id="L55">        logger.error(exception.getMessage(), exception);</span>
+
+<span class="nc" id="L57">        DeliveryErrorDetails errorDetails = new DeliveryErrorDetails(new Date(), exception.getMessage(), request.getDescription(false));</span>
+<span class="nc" id="L58">        return new ResponseEntity&lt;&gt;(errorDetails, HttpStatus.BAD_REQUEST);</span>
+
+    }
+
+    /**
+     * Handles method argument type mismatch exception.
+     *
+     * @param exception the exception
+     * @param request   the request
+     * @return the response entity
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity&lt;DeliveryErrorDetails&gt; handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException exception, WebRequest request) {
+
+<span class="nc" id="L72">        logger.error(exception.getMessage(), exception);</span>
+
+<span class="nc" id="L74">        DeliveryErrorDetails errorDetails = new DeliveryErrorDetails(new Date(), exception.getMessage(), request.getDescription(false));</span>
+<span class="nc" id="L75">        return new ResponseEntity&lt;&gt;(errorDetails, HttpStatus.BAD_REQUEST);</span>
+
+    }
+
+    /**
+     * Handles ExpiredJwtException when jwt token is expired
+     *
+     * @param exception the exception
+     * @param request   the request
+     * @return the response entity
+     */
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity&lt;DeliveryErrorDetails&gt; handleExpiredJWTException(ExpiredJwtException exception, WebRequest request) {
+
+<span class="nc" id="L89">        logger.error(exception.getMessage(), exception);</span>
+
+<span class="nc" id="L91">        DeliveryErrorDetails errorDetails = new DeliveryErrorDetails(new Date(), exception.getMessage(), request.getDescription(false));</span>
+<span class="nc" id="L92">        return new ResponseEntity&lt;&gt;(errorDetails, HttpStatus.FORBIDDEN);</span>
+
+    }
+
+    /**
+     * Handles SignatureException when jwt token is invalid
+     *
+     * @param exception the exception
+     * @param request   the request
+     * @return the response entity
+     */
+    @ExceptionHandler(SignatureException.class)
+    public ResponseEntity&lt;DeliveryErrorDetails&gt; handleSignatureException(SignatureException exception, WebRequest request) {
+
+<span class="nc" id="L106">        logger.error(exception.getMessage(), exception);</span>
+
+<span class="nc" id="L108">        DeliveryErrorDetails errorDetails = new DeliveryErrorDetails(new Date(), exception.getMessage(), request.getDescription(false));</span>
+<span class="nc" id="L109">        return new ResponseEntity&lt;&gt;(errorDetails, HttpStatus.FORBIDDEN);</span>
+
+    }
+
+    /**
+     * Global exception handler, for super Exception class
+     *
+     * @param ex      the ex
+     * @param request the request
+     * @return the response entity
+     */
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity&lt;DeliveryErrorDetails&gt; globalExceptionHandler(Exception ex, WebRequest request) {
+
+<span class="nc" id="L123">        logger.error(ex.getMessage(), ex);</span>
+
+<span class="nc" id="L125">        DeliveryErrorDetails errorDetails = new DeliveryErrorDetails(new Date(), ex.getMessage(), request.getDescription(false));</span>
+<span class="nc" id="L126">        return new ResponseEntity&lt;&gt;(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

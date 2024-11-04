@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TicketingServiceApplication.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ticketing-service</a> &gt; <a href="index.source.html" class="el_package">com.deliveryapp.ticketingservice</a> &gt; <span class="el_source">TicketingServiceApplication.java</span></div><h1>TicketingServiceApplication.java</h1><pre class="source lang-java linenums">package com.deliveryapp.ticketingservice;
+
+import com.deliveryapp.ticketingservice.constants.CustomerType;
+import com.deliveryapp.ticketingservice.constants.DeliveryStatus;
+import com.deliveryapp.ticketingservice.model.delivery.Delivery;
+import com.deliveryapp.ticketingservice.model.user.User;
+import com.deliveryapp.ticketingservice.repository.UserRepository;
+import com.deliveryapp.ticketingservice.repository.delivery.DeliveryRepository;
+import lombok.AllArgsConstructor;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
+
+import java.time.LocalDateTime;
+
+//@EnableEurekaClient
+@EnableCaching
+@SpringBootApplication(exclude = {org.springframework.cloud.loadbalancer.config.LoadBalancerAutoConfiguration.class})
+<span class="fc" id="L20">@AllArgsConstructor</span>
+public class TicketingServiceApplication implements CommandLineRunner {
+
+    private DeliveryRepository deliveryRepository;
+    private UserRepository userRepository;
+
+    public static void main(String[] args) {
+<span class="nc" id="L27">        SpringApplication.run(TicketingServiceApplication.class, args);</span>
+<span class="nc" id="L28">    }</span>
+
+    @Override
+    public void run(String... args) throws Exception {
+
+        //creating some preloaded users
+<span class="fc" id="L34">        userRepository.save(User.builder()</span>
+<span class="fc" id="L35">                .username(&quot;user1&quot;)</span>
+<span class="fc" id="L36">                .password(&quot;user1&quot;)</span>
+<span class="fc" id="L37">                .build());</span>
+
+<span class="fc" id="L39">        userRepository.save(User.builder()</span>
+<span class="fc" id="L40">                .username(&quot;user2&quot;)</span>
+<span class="fc" id="L41">                .password(&quot;user2&quot;)</span>
+<span class="fc" id="L42">                .build());</span>
+
+        //Creating some preloaded delivery items
+<span class="fc" id="L45">        deliveryRepository.save(Delivery.builder()</span>
+<span class="fc" id="L46">                .customerType(CustomerType.VIP)</span>
+<span class="fc" id="L47">                .status(DeliveryStatus.PREPARING)</span>
+<span class="fc" id="L48">                .currentDistanceFromDestination(2.4f)</span>
+<span class="fc" id="L49">                .expectedDeliveryTime(LocalDateTime.now().plusMinutes(2))</span>
+<span class="fc" id="L50">                .riderRating(7.5f)</span>
+<span class="fc" id="L51">                .meanPreparationTime(35)</span>
+<span class="fc" id="L52">                .timeToReachDestination(LocalDateTime.now().plusMinutes(25))</span>
+<span class="fc" id="L53">                .isTicketCreated(&quot;FALSE&quot;)</span>
+<span class="fc" id="L54">                .build());</span>
+
+<span class="fc" id="L56">        deliveryRepository.save(Delivery.builder()</span>
+<span class="fc" id="L57">                .customerType(CustomerType.VIP)</span>
+<span class="fc" id="L58">                .status(DeliveryStatus.PREPARING)</span>
+<span class="fc" id="L59">                .currentDistanceFromDestination(4.5f)</span>
+<span class="fc" id="L60">                .expectedDeliveryTime(LocalDateTime.now().plusMinutes(20))</span>
+<span class="fc" id="L61">                .riderRating(8.6f)</span>
+<span class="fc" id="L62">                .meanPreparationTime(25)</span>
+<span class="fc" id="L63">                .timeToReachDestination(LocalDateTime.now().plusMinutes(40))</span>
+<span class="fc" id="L64">                .isTicketCreated(&quot;FALSE&quot;)</span>
+<span class="fc" id="L65">                .build());</span>
+
+<span class="fc" id="L67">        deliveryRepository.save(Delivery.builder()</span>
+<span class="fc" id="L68">                .customerType(CustomerType.LOYAL)</span>
+<span class="fc" id="L69">                .status(DeliveryStatus.PREPARING)</span>
+<span class="fc" id="L70">                .currentDistanceFromDestination(3.4f)</span>
+<span class="fc" id="L71">                .expectedDeliveryTime(LocalDateTime.now().minusMinutes(10))</span>
+<span class="fc" id="L72">                .riderRating(9.3f)</span>
+<span class="fc" id="L73">                .meanPreparationTime(35)</span>
+<span class="fc" id="L74">                .timeToReachDestination(LocalDateTime.now().plusMinutes(15))</span>
+<span class="fc" id="L75">                .isTicketCreated(&quot;FALSE&quot;)</span>
+<span class="fc" id="L76">                .build());</span>
+
+<span class="fc" id="L78">        deliveryRepository.save(Delivery.builder()</span>
+<span class="fc" id="L79">                .customerType(CustomerType.NEW)</span>
+<span class="fc" id="L80">                .status(DeliveryStatus.PREPARING)</span>
+<span class="fc" id="L81">                .currentDistanceFromDestination(2.4f)</span>
+<span class="fc" id="L82">                .expectedDeliveryTime(LocalDateTime.now().plusMinutes(2))</span>
+<span class="fc" id="L83">                .riderRating(7.5f)</span>
+<span class="fc" id="L84">                .meanPreparationTime(35)</span>
+<span class="fc" id="L85">                .timeToReachDestination(LocalDateTime.now().plusMinutes(25))</span>
+<span class="fc" id="L86">                .isTicketCreated(&quot;FALSE&quot;)</span>
+<span class="fc" id="L87">                .build());</span>
+
+
+<span class="fc" id="L90">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

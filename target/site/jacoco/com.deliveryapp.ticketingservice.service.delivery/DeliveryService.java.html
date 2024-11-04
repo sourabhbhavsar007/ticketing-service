@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DeliveryService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ticketing-service</a> &gt; <a href="index.source.html" class="el_package">com.deliveryapp.ticketingservice.service.delivery</a> &gt; <span class="el_source">DeliveryService.java</span></div><h1>DeliveryService.java</h1><pre class="source lang-java linenums">package com.deliveryapp.ticketingservice.service.delivery;
+
+import com.deliveryapp.ticketingservice.model.delivery.Delivery;
+import com.deliveryapp.ticketingservice.repository.delivery.DeliveryRepository;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Objects;
+
+@Service
+<span class="fc" id="L18">@AllArgsConstructor</span>
+public class DeliveryService {
+
+<span class="fc" id="L21">    private static final Logger logger = LoggerFactory.getLogger(DeliveryService.class);</span>
+    private DeliveryRepository deliveryRepository;
+    private CacheManager cacheManager;
+
+    @CircuitBreaker(name = &quot;deliveryCircuitBreaker&quot;, fallbackMethod = &quot;fallbackTicketResponse&quot;)
+    @Cacheable(&quot;deliveries&quot;)
+    public List&lt;Delivery&gt; getAllDeliveries() {
+<span class="fc" id="L28">        logger.info(&quot;Fetching all the deliveries...&quot;);</span>
+<span class="fc" id="L29">        return deliveryRepository.findAll();</span>
+    }
+
+    @CircuitBreaker(name = &quot;orderCircuitBreaker&quot;, fallbackMethod = &quot;fallbackTicketResponse&quot;)
+    @Cacheable(&quot;orders&quot;)
+    public List&lt;Delivery&gt; getOrdersToBeDelivered() {
+<span class="fc" id="L35">        logger.info(&quot;Fetching all the orders to be delivered...&quot;);</span>
+<span class="fc" id="L36">        return deliveryRepository.findOrdersToBeDelivered();</span>
+    }
+
+    @CacheEvict(value = &quot;deliveries&quot;, allEntries = true)
+    public void persistDelivery(Delivery delivery) {
+<span class="fc" id="L41">        deliveryRepository.save(delivery);</span>
+<span class="fc" id="L42">    }</span>
+
+    //Normally we will call cache evict on update or delete operations
+    public void clearDeliveryCache(Long ticketId) {
+<span class="fc" id="L46">        Objects.requireNonNull(cacheManager.getCache(&quot;deliveries&quot;)).evict(ticketId);</span>
+<span class="fc" id="L47">    }</span>
+
+    public String fallbackTicketResponse(Throwable t) {
+<span class="fc" id="L50">        return &quot;Something went wrong, please try again later.&quot;;</span>
+    }
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
