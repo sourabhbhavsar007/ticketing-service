@@ -16,6 +16,37 @@ This is a Spring Boot application and we have implemented a web service that has
 The system user JWT (Json Web Token) based authentication which means that user must first enter his/her credentials and procure a JWT token on successful authentication which would be used in subsequent requests. The jwt token is to be passed in the Authorization header as "Bearer <jwt token>" in the subsequent requests.
 
 
+## To make system prod ready:
+
+To make this service prod-ready following changes are added :
+
+Service Discovery: Eureka Client
+
+DDoS Protection: Rate Limiting with Resilience4j
+
+Circuit Breaker: Resilience4j Circuit Breaker
+
+Caching: Caffeine Cache
+
+Profiling: Separate Profiles for environments
+
+HTTPS: SSL Configuration
+
+Connection Pooling: HikariCP
+
+Database Migration: Flyway
+
+Logging and MDC: Logback and MDC
+
+Monitoring: Actuator Endpoints
+
+
+Please refer application-prod.properties for properties related to above areas.
+
+I have also added @Cacheable to increse efficience by minimizing DB calls.
+
+I have enhanced test cases and test coverge. The test coverage can be seen by navigating to target/site/index.html as I have added Jacoco plugin.
+
 ## System Design:
 
 ### Architecture Diagram:
